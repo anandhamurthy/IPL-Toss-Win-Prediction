@@ -1,9 +1,14 @@
 from flask import Flask
 import pickle
 import numpy as np
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
-filename = 'model.pkl'
+filename = 'finalmodel.pkl'
 classifier = pickle.load(open(filename, 'rb'))
+df = pd.read_csv("teams.csv")
+ohe = OneHotEncoder(sparse=False)
+ohe.fit_transform(df[['team1','team2']])
 
 result={'Sunrisers Hyderabad': 0,
  'Mumbai Indians': 1,
@@ -19,9 +24,11 @@ app = Flask(__name__)
 @app.route('/predict/<msg>',methods=['GET','POST'])
 def predict(msg):
     l=msg.split(',')
-    l = [[int(l[0]), int(l[1]), int(l[2]), int(l[3])]]
-    l = np.array(l).reshape((1, -1))
-    return list(result.keys())[list(result.values()).index(classifier.predict(l).tolist()[0])]
+    user_team = [[l[0], l[1]]]
+    team = ohe.transform(user_team)
+    team = np.column_stack([team, np.array([int(l[2])])])
+    team_day = np.array(team).reshape((1, -1))
+    return list(result.keys())[list(result.values()).index(classifier.predict(team_day).tolist()[0])]
 
 
 if __name__ == '__main__':
