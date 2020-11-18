@@ -26,12 +26,12 @@ def predict(msg):
     l=msg.split(',')
     user_team = [[l[0], l[1]]]
    
-    team_1=request.args.get("team_1")
-    team_2=request.args.get("team_2")
-    day=request.args.get("day")
+#     team_1=request.args.get("team_1")
+#     team_2=request.args.get("team_2")
+#     day=request.args.get("day")
     
-    team = ohe.transform([[team_1,team_2]])
-    team = np.column_stack([team, np.array([int(day)])])
+    team = ohe.transform(user_team)
+    team = np.column_stack([team, np.array([int(l[2])])])
     team_day = np.array(team).reshape((1, -1))
     return list(result.keys())[list(result.values()).index(classifier.predict(team_day).tolist()[0])]
 
